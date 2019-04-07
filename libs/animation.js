@@ -10,12 +10,19 @@
 import Tween from "./tween"
 const customAnimation = exports.customAnimation = {}
 
-customAnimation.to = function(duration, from, to, type){
+customAnimation.to = function(duration, from, to, type, delay){
   for(let prop in from){
-
+    setTimeout((prop) => {
+      return function(){
+        TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
+          from[prop] = value
+        })
+      }(prop)
+    }, delay*1000);
   }
 }
-function TweenAnimation(from, to, duration, type, callback){
+
+const TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to, duration, type, callback){
   const frameCount = duration * 1000 / 17
   var start = -1
 
@@ -43,10 +50,20 @@ function TweenAnimation(from, to, duration, type, callback){
 
   const tweenFn = Tween[type]
 
-  const step = function(step){
+  const step = function step(){
     const currentTime = Date.now()
     const interval = currentTime - lastTime
-    if(interval <= 17)
+    let fps
+    if(interval)
+    {
+       fps = Math.ceil(1000 / interval)
+    }
+    else
+    {
+      requestAnimationFrame(step) 
+      return
+    }
+    if(fps >= 30)
     {
       start++
     }
@@ -66,7 +83,7 @@ function TweenAnimation(from, to, duration, type, callback){
       options.callback(to, true)
     }
 
-    requestAnimationFrame(step)
+    lastTime = Date.now()
    }
    step()
 }

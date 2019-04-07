@@ -1,18 +1,21 @@
 import BottleConfs from "../../confs/bottle.confs"
 import BlockConfs from "../../confs/block-confs"
+import { customAnimation } from "../../libs/animation"
 class Bottle{
     constructor(){
-
+        this.direction = 0
+        this.axis = null
     }
     init(){
         this.obj = new THREE.Object3D()
         this.obj.name = "bottle"
         this.obj.position.set(
             BottleConfs.initPosition.x,
-            BottleConfs.initPosition.y + BlockConfs.height / 2,
+            BottleConfs.initPosition.y + 30,
             BottleConfs.initPosition.z)
         
         this.bottle = new THREE.Object3D()
+        this.human = new THREE.Object3D()
         var basicMaterial = new THREE.MeshPhongMaterial({
             color:0x800080
         })
@@ -69,8 +72,10 @@ class Bottle{
         this.head.position.y = 3.57143 * headRadius
         this.head.position.z = 0 
 
-        this.bottle.add(this.body)
-        this.bottle.add(this.head)
+        this.human.add(this.body)
+        this.human.add(this.head)
+
+        this.bottom.add(this.human)
 
         this.bottle.position.x = 0
         this.bottle.position.y = 2.3
@@ -81,5 +86,27 @@ class Bottle{
     update(){
        this.head.rotation.y += 0.06 
     }
+    showUp(){
+        customAnimation.to(0.5, this.obj.position, {
+            x:BottleConfs.initPosition.x,
+            y:BottleConfs.initPosition.y + BlockConfs.height / 2,
+            z:BottleConfs.initPosition.z
+        },"BounceEaseOut")
+    }
+    setDirection(direction, axis){
+        this.direction = direction
+        this.axis = axis
+    }
+    rotate(){
+        const scale = 1.4
+        this.human.rotation.z = this.human.rotation.x = 0
+        if(this.direction == 0){//x
+            customAnimation.to(this.human.rotation, 0.14, {z:this.human.rotation.z - Math.PI})
+            customAnimation.to(this.human.rotatton, 0.18, {z:this.human.rotation.z - 2 * Math.PI},'Linear',0.14)
+        }
+        else if(this.direction == 1){//y 
+            
+        }
+    }    
 }
 export default new Bottle()

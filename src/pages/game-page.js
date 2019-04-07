@@ -30,7 +30,22 @@ export default class GamePage{
         this.addInitBlock()
         this.addGround()
         this.addBottle()
+        this.bindTouchEvent()
         this.render()
+    }
+    bindTouchEvent(){
+        canvas.addEventListener('touchstart',this.touchStartCallback)
+        canvas.addEventListener('touchend', this.touchEndCallback)
+    }
+    removeTouchEvent(){
+        canvas.removeEventListener('touchstart', this.touchStartCallback)
+        canvas.removeEventListener('touchend', this.touchEndCallback)
+    }
+    touchStartCallback(){
+        console.log("touchstart")
+    }
+    touchEndCallback(){
+        console.log("touchend")
     }
     render(){
         this.scene.render()
@@ -42,6 +57,7 @@ export default class GamePage{
     }
     addGround(){
         this.scene.instance.add(this.ground.instance)
+        this.bottle.showUp()
     }
     addInitBlock(){
         const cuboidBlock = new Cuboid(-15, 0, 0)
