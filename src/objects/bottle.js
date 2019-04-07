@@ -1,4 +1,5 @@
 import BottleConfs from "../../confs/bottle.confs"
+import BlockConfs from "../../confs/block-confs"
 class Bottle{
     constructor(){
 
@@ -8,7 +9,7 @@ class Bottle{
         this.obj.name = "bottle"
         this.obj.position.set(
             BottleConfs.initPosition.x,
-            BottleConfs.initPosition.y + 30,
+            BottleConfs.initPosition.y + BlockConfs.height / 2,
             BottleConfs.initPosition.z)
         
         this.bottle = new THREE.Object3D()
@@ -60,7 +61,7 @@ class Bottle{
         this.body.add(top)
 
         this.head = new THREE.Mesh(
-            new THREE.OctahedronGeometry(headRadius / 1.2),
+            new THREE.OctahedronGeometry(headRadius),
             basicMaterial
         )
         this.head.castShadow = true
@@ -68,9 +69,17 @@ class Bottle{
         this.head.position.y = 3.57143 * headRadius
         this.head.position.z = 0 
 
-        this.bottle.add(this.head)
         this.bottle.add(this.body)
+        this.bottle.add(this.head)
+
+        this.bottle.position.x = 0
+        this.bottle.position.y = 2.3
+        this.bottle.position.z = 0 
+        
         this.obj.add(this.bottle)
+    }
+    update(){
+       this.head.rotation.y += 0.06 
     }
 }
 export default new Bottle()

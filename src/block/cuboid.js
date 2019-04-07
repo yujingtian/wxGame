@@ -17,7 +17,6 @@ export default class Cubiod extends BaseBlock{
         this.instance.castShadow = true
         this.instance.position.x = this.x
         this.instance.position.y = this.y
-        this.instance.position.z = this.z
-        
+        this.instance.position.z = this.z   
     }
 }

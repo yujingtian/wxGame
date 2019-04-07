@@ -34,6 +34,10 @@ export default class GamePage{
     }
     render(){
         this.scene.render()
+        if(this.bottle)
+        {
+            this.bottle.update()
+        }
         requestAnimationFrame(this.render.bind(this))
     }
     addGround(){
