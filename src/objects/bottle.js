@@ -1,10 +1,18 @@
 import BottleConfs from "../../confs/bottle.confs"
 import BlockConfs from "../../confs/block-confs"
+import GameConfs from "../../confs/game.confs"
 import { customAnimation } from "../../libs/animation"
 class Bottle{
     constructor(){
         this.direction = 0
         this.axis = null
+        this.status = 'stop'
+        this.scale = 1
+        this.flyingTime = 0
+        this.velocity = {
+            vx:0,
+            vy:0
+        }
     }
     init(){
         this.obj = new THREE.Object3D()
@@ -75,38 +83,102 @@ class Bottle{
         this.human.add(this.body)
         this.human.add(this.head)
 
-        this.bottom.add(this.human)
+        this.bottle.add(this.human)
 
         this.bottle.position.x = 0
-        this.bottle.position.y = 2.3
+        this.bottle.position.y = 2.2
         this.bottle.position.z = 0 
         
         this.obj.add(this.bottle)
     }
+    _shrink(){
+        const MIN_SCALE = 0.55
+        const HORIZON_DELTA_SCALE = 0.007
+        const DELTA_SCALE = 0.005
+        const HEAD_DELTA = 0.03
+
+        this.scale -= DELTA_SCALE
+        this.scale = Math.max(MIN_SCALE, this.scale)
+        if(this.scale <= MIN_SCALE){
+            return;
+        }
+        this.body.scale.y = this.scale
+        this.body.scale.x += HORIZON_DELTA_SCALE
+        this.body.scale.z += HORIZON_DELTA_SCALE
+        this.head.position.y -= HEAD_DELTA
+
+        const bottleDeltaY = HEAD_DELTA / 2 
+        const deltaY = BlockConfs.height * DELTA_SCALE / 2
+        this.obj.position.y -= (bottleDeltaY + deltaY * 2) 
+    }
     update(){
+       if(this.status == "shrink"){
+           this._shrink()
+       }else if(this.status == "jump"){
+           const tickTime = Date.now() - this.lastFrameTime 
+           this._jump(tickTime)
+       }
        this.head.rotation.y += 0.06 
+       this.lastFrameTime = Date.now()
     }
     showUp(){
         customAnimation.to(0.5, this.obj.position, {
             x:BottleConfs.initPosition.x,
             y:BottleConfs.initPosition.y + BlockConfs.height / 2,
             z:BottleConfs.initPosition.z
-        },"BounceEaseOut")
+        }, "BounceEaseOut", 1)
     }
     setDirection(direction, axis){
         this.direction = direction
         this.axis = axis
     }
-    rotate(){
+    shrink () {
+        this.status = "shrink"
+    }
+
+    stop(){
+        this.scale = 1
+        this.flyingTime = 0
+        this.status = "stop"
+        this.velocity = {
+            vx: 0, // 水平方向速度
+            vy: 0 //竖直方向速度
+        }
+    }
+
+    jump(){
+        this.status = 'jump'
+    }
+    _jump(tickTime){
+        const t = tickTime / 1000
+        this.flyingTime = this.flyingTime + t
+        const translateH = this.velocity.vx * t
+        const translateY = this.velocity.vy * t - 0.5 * GameConfs.gravity * t * t - GameConfs.gravity * this.flyingTime * t
+        this.obj.translateY(translateY)
+        this.obj.translateOnAxis(this.axis, translateH)
+    }
+    rotate () {    
         const scale = 1.4
         this.human.rotation.z = this.human.rotation.x = 0
-        if(this.direction == 0){//x
-            customAnimation.to(this.human.rotation, 0.14, {z:this.human.rotation.z - Math.PI})
-            customAnimation.to(this.human.rotatton, 0.18, {z:this.human.rotation.z - 2 * Math.PI},'Linear',0.14)
+        if (this.direction == 0) { // x
+          customAnimation.to( 0.14, this.human.rotation, { z: this.human.rotation.z - Math.PI })
+          customAnimation.to( 0.18, this.human.rotation, { z: this.human.rotation.z - 2 * Math.PI},'Linear',0.14)
+          customAnimation.to( 0.1, this.head.position,{ y: this.head.position.y + 0.9 * scale, x: this.head.position.x + 0.45 * scale })
+          customAnimation.to( 0.1, this.head.position, { y: this.head.position.y - 0.9 * scale, x: this.head.position.x - 0.45 * scale },'Linear',0.1)
+          customAnimation.to( 0.15, this.head.position, { y: 7.56, x: 0 },'Linear', 0.25)
+          customAnimation.to( 0.1, this.body.scale,  { y: Math.max(scale, 1), x: Math.max(Math.min(1 / scale, 1), 0.7), z: Math.max(Math.min(1 / scale, 1), 0.7) })
+          customAnimation.to( 0.1, this.body.scale, { y: Math.min(0.9 / scale, 0.7), x: Math.max(scale, 1.2), z: Math.max(scale, 1.2)},'Linear',0.1)
+          customAnimation.to( 0.3, this.body.scale, { y: 1, x: 1, z: 1},'Linear', 0.2)
+        } else if (this.direction == 1) { // z
+          customAnimation.to( 0.14, this.human.rotation, { x: this.human.rotation.x - Math.PI })
+          customAnimation.to( 0.18, this.human.rotation, { x: this.human.rotation.x - 2 * Math.PI, delay: 0.14 })
+          customAnimation.to( 0.1, this.head.position, { y: this.head.position.y + 0.9 * scale, z: this.head.position.z - 0.45 * scale })
+          customAnimation.to( 0.1, this.head.position, { z: this.head.position.z + 0.45 * scale, y: this.head.position.y - 0.9 * scale, delay: 0.1 })
+          customAnimation.to( 0.15, this.head.position, { y: 7.56, z: 0, delay: 0.25 })
+          customAnimation.to( 0.05, this.body.scale, { y: Math.max(scale, 1), x: Math.max(Math.min(1 / scale, 1), 0.7), z: Math.max(Math.min(1 / scale, 1), 0.7) })
+          customAnimation.to( 0.05, this.body.scale, { y: Math.min(0.9 / scale, 0.7), x: Math.max(scale, 1.2), z: Math.max(scale, 1.2), delay: 0.1 })
+          customAnimation.to( 0.2, this.body.scale, { y: 1, x: 1, z: 1, delay: 0.2 })
         }
-        else if(this.direction == 1){//y 
-            
-        }
-    }    
+      }
 }
 export default new Bottle()

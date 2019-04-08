@@ -11,14 +11,15 @@ import Tween from "./tween"
 const customAnimation = exports.customAnimation = {}
 
 customAnimation.to = function(duration, from, to, type, delay){
-  for(let prop in from){
-    setTimeout((prop) => {
+  var delay = delay || 0;
+  for(let prop in to){
+    setTimeout(function(prop){
       return function(){
         TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
           from[prop] = value
         })
-      }(prop)
-    }, delay*1000);
+      } 
+    }(prop), delay * 1000);
   }
 }
 
@@ -47,9 +48,14 @@ const TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to
   {
     options.duration = duration
   }
-
-  const tweenFn = Tween[type]
-
+  var tweenFn = Tween
+  var arr = options.type.split(".")
+  if (arr.length == 1) {
+      tweenFn = tweenFn[arr[0]];
+  } else if (arr.length == 2) {
+      tweenFn = tweenFn[arr[0]] && tweenFn[arr[0]][arr[1]];
+  }
+  
   const step = function step(){
     const currentTime = Date.now()
     const interval = currentTime - lastTime
