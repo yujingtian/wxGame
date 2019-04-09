@@ -126,7 +126,7 @@ class Bottle{
             x:BottleConfs.initPosition.x,
             y:BottleConfs.initPosition.y + BlockConfs.height / 2,
             z:BottleConfs.initPosition.z
-        }, "BounceEaseOut", 1)
+        }, "Bounce.easeOut", 1)
     }
     setDirection(direction, axis){
         this.direction = direction
@@ -151,11 +151,13 @@ class Bottle{
     }
     _jump(tickTime){
         const t = tickTime / 1000
-        this.flyingTime = this.flyingTime + t
         const translateH = this.velocity.vx * t
         const translateY = this.velocity.vy * t - 0.5 * GameConfs.gravity * t * t - GameConfs.gravity * this.flyingTime * t
+        this.translateH += translateH
+        this.translateY += translateY
         this.obj.translateY(translateY)
         this.obj.translateOnAxis(this.axis, translateH)
+        this.flyingTime = this.flyingTime + t
     }
     rotate () {    
         const scale = 1.4
@@ -180,5 +182,12 @@ class Bottle{
           customAnimation.to( 0.2, this.body.scale, { y: 1, x: 1, z: 1, delay: 0.2 })
         }
       }
+    reset(){
+        this.stop()
+        this.obj.position.set( 
+            BottleConfs.initPosition.x,
+            BottleConfs.initPosition.y + 30,
+            BottleConfs.initPosition.z)
+    }
 }
 export default new Bottle()

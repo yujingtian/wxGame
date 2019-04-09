@@ -36,4 +36,20 @@ export default class BaseBlock{
         customAnimation.to( 0.5, this.instance.scale, { y: 1 }, 'Elastic.easeOut')
         customAnimation.to( 0.5, this.instance.position, { y: 0}, 'Elastic.easeOut')
     }
+    getVertices(){
+        const vertices = []
+        const centerPosition = {
+            x: this.instance.position.x,
+            z: this.instance.position.z
+        }
+        vertices.push([centerPosition.x + this.width / 2,centerPosition.z + this.width / 2])
+        vertices.push([centerPosition.x + this.width / 2,centerPosition.z - this.width / 2])
+        vertices.push([centerPosition.x - this.width / 2,centerPosition.z + this.width / 2])
+        vertices.push([centerPosition.x - this.width / 2,centerPosition.z - this.width / 2])
+        return vertices
+    }
+    popup () {
+        this.instance.position.set(this.x, this.y + 30, this.z)
+        customAnimation.to(0.5, this.instance.position, { x: this.x, y: this.y, z: this.z },'Bounce.easeOut')
+    }
 }

@@ -15,8 +15,9 @@ export default class Cylinder extends BaseBlock{
         this.y = y
         this.z = z
         this.instance.castShadow = true
-        this.instance.position.x = this.x
-        this.instance.position.y = this.y
-        this.instance.position.z = this.z
+        this.popup()
+        // this.instance.position.x = this.x
+        // this.instance.position.y = this.y
+        // this.instance.position.z = this.z
     }
 }

@@ -4,7 +4,7 @@
 // import GameInfo   from './runtime/gameinfo'
 // import Music      from './runtime/music'
 // import DataBus    from './databus'
-import * as THREE from "../libs/three.min.js";
+import * as THREE from "../libs/three.js";
 window.THREE = THREE
 import game from "./game/game"
 /**
