@@ -8,6 +8,7 @@ import GameConfs from "../../confs/game.confs"
 import BottleConfs from "../../confs/bottle.confs";
 import utils from "../utils/index"
 import ScoreText from "../view3d/scoreText"
+import AudioManager from "../modules/index"
 
 
 const HIT_NEXT_BLOCK_CENTER = 1
@@ -22,7 +23,8 @@ export default class GamePage{
         this.callbacks = callbacks
         this.targetPosition = {}
         this.checkingHit = false
-        this.score = 0 
+        this.combo = 0
+        this.score = 0
     }
 
     show(){
@@ -39,6 +41,7 @@ export default class GamePage{
         this.bottle.reset()
         this.ground.reset()
         this.updateScore(0)
+        this.score = 0
         this.addInitBlock()
         this.addGround()
         this.addBottle()
@@ -90,6 +93,7 @@ export default class GamePage{
         this.touchStartTime = Date.now()
         this.bottle.shrink()
         this.currentBlock.shrink()
+        AudioManager.shrink.play()
     }
     touchEndCallback = (e) => {
         console.log("touchend");
@@ -106,6 +110,8 @@ export default class GamePage{
         this.currentBlock.rebound()
         this.bottle.rotate()
         this.bottle.jump()
+        AudioManager.shrink.stop()
+        AudioManager.shrink_end.stop()
     }
 
     setDirection(direction){
@@ -173,7 +179,16 @@ export default class GamePage{
                 this.bottle.obj.position.y = BlockConfs.height / 2
                 this.bottle.obj.position.x = this.bottle.destination[0]
                 this.bottle.obj.position.z = this.bottle.destination[1]
-                this.updateScore(++this.score)
+                if(this.hit == HIT_NEXT_BLOCK_CENTER){
+                    this.combo++
+                    AudioManager['combo'+(this.combo<=8?this.combo:8)].play()
+                    this.score += 2 * this.combo 
+                    this.updateScore(this.score)
+                  }else if(this.hit == HIT_NEXT_BLOCK_NORMAL){
+                      this.combo = 0
+                      AudioManager.success.play()
+                      this.updateScore(++this.score)
+                  }
                 this.updateNextBlock()
             }else{
                 //game over

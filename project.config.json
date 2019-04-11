@@ -8,7 +8,7 @@
 		"newFeature": true
 	},
 	"compileType": "game",
-	"libVersion": "1.9.94",
+	"libVersion": "2.2.1",
 	"appid": "wx2cf16b1119da2b88",
 	"projectname": "wxGame",
 	"condition": {
