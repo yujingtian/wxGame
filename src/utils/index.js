@@ -46,9 +46,9 @@ export default {
         UVs[2].x = x1 * tileUvW;UVs[2].y = y2 * tileUvH;
         UVs[1].x = x2 * tileUvW;UVs[1].y = y1 * tileUvH;
       } else {
-        UVs[0].x = x1 * tileUvW;UVs[0].y = y1 * tileUvH;
-        UVs[1].x = x1 * tileUvW;UVs[1].y = y2 * tileUvH;
-        UVs[2].x = x2 * tileUvW;UVs[2].y = y1 * tileUvH;
+        UVs[0].x = x2 * tileUvW;UVs[0].y = y2 * tileUvH;
+        UVs[1].x = x2 * tileUvW;UVs[1].y = y1 * tileUvH;
+        UVs[2].x = x1 * tileUvW;UVs[2].y = y2 * tileUvH;
       }
       var UVs = geometry.faceVertexUvs[0][faceIdx * 2 + 1];
       if (faceIdx == 4 && !flag) {
@@ -56,9 +56,9 @@ export default {
         UVs[1].x = x2 * tileUvW;UVs[1].y = y2 * tileUvH;
         UVs[0].x = x2 * tileUvW;UVs[0].y = y1 * tileUvH;
       } else {
-        UVs[0].x = x1 * tileUvW;UVs[0].y = y2 * tileUvH;
-        UVs[1].x = x2 * tileUvW;UVs[1].y = y2 * tileUvH;
-        UVs[2].x = x2 * tileUvW;UVs[2].y = y1 * tileUvH;
+        UVs[0].x = x2 * tileUvW;UVs[0].y = y1 * tileUvH;
+        UVs[1].x = x1 * tileUvW;UVs[1].y = y1 * tileUvH;
+        UVs[2].x = x1 * tileUvW;UVs[2].y = y2 * tileUvH;
       }
     }
   }

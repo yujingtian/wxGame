@@ -1,7 +1,8 @@
 import BottleConfs from "../../confs/bottle.confs"
 import BlockConfs from "../../confs/block-confs"
 import GameConfs from "../../confs/game.confs"
-import { customAnimation } from "../../libs/animation"
+import { customAnimation } from "../../libs/animation" 
+import AudioManager from "../modules/index"
 class Bottle{
     constructor(){
         this.direction = 0
@@ -9,6 +10,9 @@ class Bottle{
         this.status = 'stop'
         this.scale = 1
         this.flyingTime = 0
+        this.translateH = 0
+        this.translateY = 0
+        this.destination = {}
         this.velocity = {
             vx:0,
             vy:0
@@ -122,11 +126,12 @@ class Bottle{
        this.lastFrameTime = Date.now()
     }
     showUp(){
+        AudioManager.init.play()
         customAnimation.to(0.5, this.obj.position, {
             x:BottleConfs.initPosition.x,
             y:BottleConfs.initPosition.y + BlockConfs.height / 2,
             z:BottleConfs.initPosition.z
-        }, "Bounce.easeOut", 1)
+        }, "Bounce.easeOut", 1000000)
     }
     setDirection(direction, axis){
         this.direction = direction
@@ -159,6 +164,50 @@ class Bottle{
         this.obj.translateOnAxis(this.axis, translateH)
         this.flyingTime = this.flyingTime + t
     }
+    forerake(){
+        this.status = 'forerake'
+        setTimeout(()=>{
+            if(this.direction == 0){
+                customAnimation.to(1, this.obj.rotation, {
+                    z: -Math.PI / 2
+                })  
+            } else {
+                customAnimation.to(1, this.obj.rotation, {
+                    x: -Math.PI / 2
+                })
+            }
+            setTimeout(()=>{
+                customAnimation.to(0.4, this.obj.position, {
+                    y : -BlockConfs.height / 2 + 1.2
+                })
+            },350)
+        },200)
+    }
+    hypsokinesis(){
+        this.status = 'hypsokinesis'
+        setTimeout(()=>{
+            if(this.direction == 0){
+                customAnimation.to(0.8, this.obj.rotation, {
+                    z: Math.PI / 2
+                })  
+            } else {
+                customAnimation.to(0.8 , this.obj.rotation, {
+                    x: Math.PI / 2
+                })
+            }
+            setTimeout(()=>{
+                customAnimation.to(0.4, this.obj.position, {
+                    y : -BlockConfs.height / 2 + 1.2
+                })
+                customAnimation.to(0.2, this.head.position, {
+                    x: 1.125
+                })
+                customAnimation.to(0.2, this.head.position, {
+                    x: 0
+                }, 'Linear', 0.2)
+            },350)
+        },200)
+    }
     rotate () {    
         const scale = 1.4
         this.human.rotation.z = this.human.rotation.x = 0
@@ -184,6 +233,8 @@ class Bottle{
       }
     reset(){
         this.stop()
+        this.obj.rotation.x = 0
+        this.obj.rotation.z = 0
         this.obj.position.set( 
             BottleConfs.initPosition.x,
             BottleConfs.initPosition.y + 30,

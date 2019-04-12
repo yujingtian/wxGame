@@ -8,6 +8,10 @@
 */
 
 import Tween from "./tween"
+
+let animationId = -1
+let stoppedAnimationId = animationId = -1
+
 const customAnimation = exports.customAnimation = {}
 
 customAnimation.to = function(duration, from, to, type, delay){
@@ -24,6 +28,7 @@ customAnimation.to = function(duration, from, to, type, delay){
 }
 
 const TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to, duration, type, callback){
+  const selfAnimationId = ++animationId
   const frameCount = duration * 1000 / 17
   var start = -1
 
@@ -79,12 +84,12 @@ const TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to
     }
     const value = tweenFn(start, from, to - from, frameCount)
 
-    if(start <= frameCount)
+    if(start <= frameCount && selfAnimationId > stoppedAnimationId)
     { 
       //动画继续
       options.callback(value)
       requestAnimationFrame(step)
-    }else{
+    }else if(start > frameCount && selfAnimationId > stoppedAnimationId){
       //动画结束
       options.callback(to, true)
     }
@@ -92,4 +97,8 @@ const TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to
     lastTime = Date.now()
    }
    step()
+}
+
+const stopAllAnimation =  exports.stopAllAnimation =function stopAllAnimation(){
+  stoppedAnimationId = animationId
 }

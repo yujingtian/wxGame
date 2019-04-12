@@ -1,10 +1,10 @@
 export default {
     audioSources:{
-        'init':'res/audios/init.mp3',
+        'init':'res/audios/start.mp3',
         'shrink':'res/audios/scale_intro.mp3',
         'shrink_end':'res/audios/scale_loop.mp3',
         'fall':'res/audios/fall.mp3',
-        'fall_from_block':'res/audios/fall_from_block.mp3',
+        'fall_from_block':'res/audios/fall_2.mp3',
         'combo1':'res/audios/combo1.mp3',
         'combo2':'res/audios/combo2.mp3',
         'combo3':'res/audios/combo3.mp3',

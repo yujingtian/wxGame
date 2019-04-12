@@ -9,6 +9,7 @@ import BottleConfs from "../../confs/bottle.confs";
 import utils from "../utils/index"
 import ScoreText from "../view3d/scoreText"
 import AudioManager from "../modules/index"
+import { stopAllAnimation } from "../../libs/animation"
 
 
 const HIT_NEXT_BLOCK_CENTER = 1
@@ -158,7 +159,7 @@ export default class GamePage{
         }
         this.setDirection(direction)
         if(type == 'cuboid'){
-            this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z, width)
+            this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z, width, "well")
         }else if(type == 'cylinder'){
             this.nextBlock = new Cylinder(targetPosition.x, targetPosition.y, targetPosition.z, width)
         }
@@ -179,21 +180,47 @@ export default class GamePage{
                 this.bottle.obj.position.y = BlockConfs.height / 2
                 this.bottle.obj.position.x = this.bottle.destination[0]
                 this.bottle.obj.position.z = this.bottle.destination[1]
-                if(this.hit == HIT_NEXT_BLOCK_CENTER){
-                    this.combo++
-                    AudioManager['combo'+(this.combo<=8?this.combo:8)].play()
-                    this.score += 2 * this.combo 
-                    this.updateScore(this.score)
-                  }else if(this.hit == HIT_NEXT_BLOCK_NORMAL){
-                      this.combo = 0
-                      AudioManager.success.play()
-                      this.updateScore(++this.score)
-                  }
-                this.updateNextBlock()
-            }else{
+                if(this.hit == HIT_NEXT_BLOCK_NORMAL || this.hit == HIT_NEXT_BLOCK_CENTER )
+                {
+                     if(this.hit == HIT_NEXT_BLOCK_CENTER){
+                        this.combo++
+                        AudioManager['combo'+(this.combo<=8?this.combo:8)].play()
+                        this.score += 2 * this.combo 
+                        this.updateScore(this.score)
+                      }else if(this.hit == HIT_NEXT_BLOCK_NORMAL){
+                          this.combo = 0
+                          AudioManager.success.play()
+                          this.updateScore(++this.score)
+                      }
+                      this.updateNextBlock()
+                }
+            } else {
                 //game over
+                this.combo = 0;
+                if(this.hit == GAME_OVER_NEXT_BLOCK_BACK || this.hit == GAME_OVER_CURRENT_BLOCK_BACK){
+                    stopAllAnimation()
+                    this.bottle.stop()
+                    this.bottle.forerake()
+                    AudioManager.fall_from_block.play()
+                    this.bottle.obj.position.y = BlockConfs.height / 2 
+                    setTimeout(()=>{
+                        this.callbacks.showGameOverPage()
+                    },2000)
+                }else if(this.hit == GAME_OVER_NEXT_BLOCK_FRONT){
+                    stopAllAnimation()
+                    this.bottle.stop()
+                    this.bottle.hypsokinesis()
+                    AudioManager.fall_from_block.play()
+                    this.bottle.obj.position.y = BlockConfs.height / 2 
+                    setTimeout(()=>{
+                        this.callbacks.showGameOverPage()
+                    },2000)
+                }else{
+                  AudioManager.fall_from_block.play()
+                  this.callbacks.showGameOverPage()  
+                }
                 this.removeTouchEvent()
-                this.callbacks.showGameOverPage()
+                
             }
         }
     }
@@ -209,7 +236,7 @@ export default class GamePage{
         this.scene.updateScore(this.scoreText.instance)
     }
     addInitBlock(){
-        const cuboidBlock = this.currentBlock = new Cuboid(-15, 0, 0)
+        const cuboidBlock = this.currentBlock = new Cuboid(-15, 0, 0, 'well')
         const cylinderBlock = this.nextBlock = new Cylinder(23, 0, 0)
         this.targetPosition = {
             x:23,
