@@ -14,16 +14,20 @@ let stoppedAnimationId = animationId = -1
 
 const customAnimation = exports.customAnimation = {}
 
-customAnimation.to = function(duration, from, to, type, delay){
+customAnimation.to = function(duration, from, to, type, delay, CompleteCallback){
   var delay = delay || 0;
+  var CompleteCallback = CompleteCallback || function(){}
   for(let prop in to){
-    setTimeout(function(prop){
+    setTimeout((function(prop){
       return function(){
         TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
           from[prop] = value
+          if(complete){
+            CompleteCallback(value)
+          }
         })
       } 
-    }(prop), delay * 1000);
+    })(prop), delay * 1000);
   }
 }
 

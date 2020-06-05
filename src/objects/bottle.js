@@ -1,8 +1,9 @@
 import BottleConfs from "../../confs/bottle.confs"
 import BlockConfs from "../../confs/block-confs"
 import GameConfs from "../../confs/game.confs"
-import { customAnimation } from "../../libs/animation" 
+import { customAnimation, TweenAnimation } from "../../libs/animation" 
 import AudioManager from "../modules/index"
+import ScoreText from "../view3d/scoreText"
 class Bottle{
     constructor(){
         this.direction = 0
@@ -19,6 +20,7 @@ class Bottle{
         }
     }
     init(){
+        this.loader = new THREE.TextureLoader()
         this.obj = new THREE.Object3D()
         this.obj.name = "bottle"
         this.obj.position.set(
@@ -94,6 +96,155 @@ class Bottle{
         this.bottle.position.z = 0 
         
         this.obj.add(this.bottle)
+        this.particles = []
+        const _this = this
+        const whiteParticleMaterial = new THREE.MeshBasicMaterial({
+            alphaTest:0.5,
+            map:this.loader.load("/game/res/images/white.png")
+        })
+
+        const greenParticleMaterial = new THREE.MeshBasicMaterial({
+            alphaTest:0.5,
+            map:this.loader.load("/game/res/images/green.png")
+        })
+        const particleGeometry = new THREE.PlaneGeometry(2,2)
+        for(let i = 0; i < 15; i++){
+            let particle = new THREE.Mesh(particleGeometry, whiteParticleMaterial)
+            particle.rotation.x = -Math.PI / 4
+            particle.rotation.y = -Math.PI / 5
+            particle.rotation.z = -Math.PI / 5
+            this.particles.push(particle)
+            this.obj.add(particle)
+        }
+        for(let i = 0; i < 5; i++){
+            let particle = new THREE.Mesh(particleGeometry, greenParticleMaterial)
+            particle.rotation.x = -Math.PI / 4
+            particle.rotation.y = -Math.PI / 5
+            particle.rotation.z = -Math.PI / 5
+            this.particles.push(particle)
+            this.obj.add(particle)
+        }
+        this.ScoreText = new ScoreText()
+        this.ScoreText.init({
+            fillStyle:0x252525
+        })
+        this.ScoreText.instance.visible = false
+        this.ScoreText.instance.rotation.y = -Math.PI / 4
+        this.ScoreText.instance.scale.set(0.5, 0.5, 0.5)
+        this.obj.add(this.ScoreText.instance)
+    }
+    showAddScore(score){
+        const value = '+' + score
+        this.ScoreText.updateScore(value)
+        this.ScoreText.instance.visible = true
+        this.ScoreText.instance.position.y = 3
+        this.ScoreText.instance.material.opacity = 1
+
+        customAnimation.to(0.7, this.ScoreText.instance.position, {
+            y:BlockConfs.height + 6
+        }) 
+        TweenAnimation(this.ScoreText.instance.material.opacity, 0, 0.7, 'Linear', (value, complete)=>{
+            this.ScoreText.instance.material.opacity = value
+            if(complete){
+                this.ScoreText.instance.visible = false
+            }
+        })
+    }
+    resetParticles(){
+        if(this.gatherTimer){
+            clearTimeout(this.gatherTimer)
+        }
+        this.gatherTimer = null
+        for(let i = 0; i < this.particles.length; i++){
+            this.particles[i].gathering = false
+            this.particles[i].scattering = false
+            this.particles[i].visible = false
+        }
+    }
+    scatterParticles(){
+        for(let i = 0; i < 10; i++ )
+        {
+            this.particles[i].scattering = true
+            this.particles[i].gathering = false
+            this._scatterParticle(this.particles[i]) 
+        }
+    }
+    _scatterParticle(particle){
+        const minDistance = BottleConfs.bodyWidth
+        const maxDistance = 2
+        const x = (minDistance + Math.random() * (maxDistance - minDistance)) * (1 - 2 * Math.random())
+        const z = (minDistance + Math.random() * (maxDistance - minDistance)) * (1 - 2 * Math.random())    
+        particle.scale.set(1, 1, 1)
+        particle.visible = false
+        particle.position.x = x 
+        particle.position.y = -0.5  
+        particle.position.z = z
+        setTimeout(((particle)=>{
+            return ()=>{
+                if(!particle.scattering) return;
+                particle.visible = true
+                const duration = 0.3 + Math.random() * 0.2
+                customAnimation.to(duration, particle.scale, {
+                    x: 0.2,
+                    y: 0.2,
+                    z: 0.2
+                })
+                customAnimation.to(duration, particle.position, {
+                    x: 2 * x ,
+                    y: Math.random() * 2.5 + 2,
+                    z: 2 * z
+                },undefined, undefined, ()=>{
+                    particle.scattering = false
+                    particle.visible = false
+                })
+            }
+        })(particle), Math.random() * 500)
+    }
+    gatherParticle(){
+        for (let i = 10; i < 20; i++ ){
+            this.particles[i].gathering = true
+            this.particles[i].scattering = false 
+            this._gatherParticle(this.particles[i])
+        }
+        this.gatherTimer = setTimeout(()=>{
+            for (let i = 0; i < 10; i++ ){
+                this.particles[i].gathering = true
+                this.particles[i].scattering = false 
+                this._gatherParticle(this.particles[i])
+            }
+        }, 500 + 1000 * Math.random())
+    }
+    _gatherParticle(particle){
+        const minDistance = 1
+        const maxDistance = 8
+        particle.visible = false
+        const x = Math.random() > 0.5? 1:-1
+        const z = Math.random() > 0.5? 1:-1
+        particle.position.x = (minDistance + (maxDistance - minDistance) * Math.random()) * x
+        particle.position.y = (minDistance + (maxDistance - minDistance) * Math.random())
+        particle.position.z = (minDistance + (maxDistance - minDistance) * Math.random()) * z
+        setTimeout(((particle)=>{
+            return ()=>{
+                if(!particle.gathering) return;
+                particle.visible = true
+                const duration = 0.5 + Math.random() * 0.4
+                customAnimation.to(duration, particle.scale, {
+                    x: 0.8 + Math.random() ,
+                    y: 0.8 + Math.random() ,
+                    z: 0.8 + Math.random()
+                })
+                customAnimation.to(duration, particle.position, {
+                    x: Math.random() * x ,
+                    y: Math.random() * 2.5,
+                    z: Math.random() * z
+                },undefined, undefined, ()=>{
+                    if(particle.gathering){
+                        this._gatherParticle(particle)
+                    }
+                })
+            }
+        })(particle), Math.random() * 500)
+
     }
     _shrink(){
         const MIN_SCALE = 0.55
@@ -131,7 +282,7 @@ class Bottle{
             x:BottleConfs.initPosition.x,
             y:BottleConfs.initPosition.y + BlockConfs.height / 2,
             z:BottleConfs.initPosition.z
-        }, "Bounce.easeOut", 1000000)
+        }, "Bounce.easeOut", 0.5)
     }
     setDirection(direction, axis){
         this.direction = direction
@@ -139,6 +290,7 @@ class Bottle{
     }
     shrink () {
         this.status = "shrink"
+        this.gatherParticle()
     }
 
     stop(){
@@ -153,6 +305,9 @@ class Bottle{
 
     jump(){
         this.status = 'jump'
+        this.translateH = 0
+        this.translateY = 0
+        this.resetParticles()
     }
     _jump(tickTime){
         const t = tickTime / 1000

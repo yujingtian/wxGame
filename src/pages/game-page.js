@@ -159,9 +159,9 @@ export default class GamePage{
         }
         this.setDirection(direction)
         if(type == 'cuboid'){
-            this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z, width, "well")
+            this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z,"color", width)
         }else if(type == 'cylinder'){
-            this.nextBlock = new Cylinder(targetPosition.x, targetPosition.y, targetPosition.z, width)
+            this.nextBlock = new Cylinder(targetPosition.x, targetPosition.y, targetPosition.z,'color', width)
         }
         this.scene.instance.add(this.nextBlock.instance)
         const cameraTargetPosition = {
@@ -186,10 +186,12 @@ export default class GamePage{
                         this.combo++
                         AudioManager['combo'+(this.combo<=8?this.combo:8)].play()
                         this.score += 2 * this.combo 
+                        this.bottle.showAddScore(2 * this.combo)
                         this.updateScore(this.score)
                       }else if(this.hit == HIT_NEXT_BLOCK_NORMAL){
                           this.combo = 0
                           AudioManager.success.play()
+                          this.bottle.showAddScore(1)
                           this.updateScore(++this.score)
                       }
                       this.updateNextBlock()
@@ -222,6 +224,7 @@ export default class GamePage{
                 this.removeTouchEvent()
                 
             }
+            this.bottle.scatterParticles()
         }
     }
     addGround(){
@@ -233,11 +236,10 @@ export default class GamePage{
     }
     updateScore(score){
         this.scoreText.updateScore(score)
-        this.scene.updateScore(this.scoreText.instance)
     }
     addInitBlock(){
-        const cuboidBlock = this.currentBlock = new Cuboid(-15, 0, 0, 'well')
-        const cylinderBlock = this.nextBlock = new Cylinder(23, 0, 0)
+        const cuboidBlock = this.currentBlock = new Cuboid(-15, 0, 0, 'color')
+        const cylinderBlock = this.nextBlock = new Cylinder(23, 0, 0, 'color')
         this.targetPosition = {
             x:23,
             y:0,

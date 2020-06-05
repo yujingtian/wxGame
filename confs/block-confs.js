@@ -7,6 +7,7 @@ export default {
      purple:0x8a9ad6,
      green:0x2c9F67,
      blue:0x009ff7,
-     yellow:0xffbe00
+     yellow:0xffbe00,
+     white:0xd8d0d1
     }
 }
